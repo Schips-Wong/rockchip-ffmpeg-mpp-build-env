@@ -1,22 +1,10 @@
 # 工具链前缀
 HOST_TC=aarch64-linux-gnu
-if [ -z "$HOST_TC" ];then
-	CROCOSS_TC=""
-else
-	CROCOSS_TC=${HOST_TC}-
-fi
-
 
 # 源码下载路径
 MPP_URL=https://gitee.com/nyanmisaka/mpp
 RGA_URL=https://gitee.com/nyanmisaka/rga
 FMP_URL=https://gitee.com/nyanmisaka/ffmpeg-rockchip
-
-ARM_GCC=${CROCOSS_TC}gcc
-ARM_GXX=${CROCOSS_TC}g++
-ARM_AR=${CROCOSS_TC}ar
-ARM_STRIP=${CROCOSS_TC}strip
-
 
 
 top_dir=`pwd`
@@ -31,6 +19,29 @@ function require () {
     echo "Checking [$1]"
     command -v $1 >/dev/null 2>&1 || { echo >&2 "Aborted : Require \"$1\" but not found."; exit 1; }
 }
+
+set_up_for_meson_ninja()
+{
+	export PATH=~/.local/bin:$PATH
+}
+
+
+set_up_for_meson_ninja
+
+if [ -z "$HOST_TC" ];then
+	CROCOSS_TC=""
+else
+	CROCOSS_TC=${HOST_TC}-
+fi
+
+ARM_GCC=${CROCOSS_TC}gcc
+ARM_GXX=${CROCOSS_TC}g++
+ARM_AR=${CROCOSS_TC}ar
+ARM_STRIP=${CROCOSS_TC}strip
+
+
+require ${ARM_GCC}
+
 
 require cmake
 require ninja
@@ -99,11 +110,6 @@ cat <<EOF
 EOF
 ) > build.rkrga.sh
 	bash ./build.rkrga.sh
-}
-
-set_up_for_meson_ninja()
-{
-	export PATH=~/.local/bin:$PATH
 }
 
 # 不能用太老的版本，会引起“error: ‘DRM_FORMAT_INVALID’ undeclared (first use in this function); did you mean ‘DRM_FORMAT_MOD_INVALID’?”错误
@@ -245,7 +251,6 @@ EOF
 )  > $src_dir/cross_file_aarch64.txt
 }
 
-set_up_for_meson_ninja
 
 mk_rkmpp
 mk_rkrga
