@@ -8,19 +8,35 @@ extern "C" {
 #include <libavutil/opt.h>
 #include <libswscale/swscale.h>
 }
-   void list_encoders() {
-       const AVCodec *codec = nullptr;
-       void *i = 0;
-       while ((codec = av_codec_iterate(&i))) {
-           if (av_codec_is_encoder(codec)) {
-               std::cout << "Encoder: " << codec->name << std::endl;
-           }
+
+void list_encoders() {
+   const AVCodec *codec = nullptr;
+   void *i = 0;
+   while ((codec = av_codec_iterate(&i))) {
+       if (av_codec_is_encoder(codec)) {
+           std::cout << "Encoder: " << codec->name << std::endl;
        }
    }
-int main() {
-    const std::string input_rtsp_url    = "rtsp://input_rtsp_url";
-    // const std::string input_rtsp_url    = "rtsp://username:password@ip:554/Streaming/Channels/1";// 海康摄像头RTSP格式
-    const std::string output_rtsp_url   = "rtsp://output_rtsp_url";//"rtsp://127.0.0.1:8555/ch1";
+}
+
+int main(int argc, char * argv[]) {
+    //  "rtsp://username:password@ip:554/Streaming/Channels/1";// 海康摄像头RTSP格式
+    const std::string input_rtsp_url_default    = "rtsp://127.0.0.1:555/ch1";
+    const std::string output_rtsp_url_default   = "rtsp://127.0.0.1:8555/ch1";
+
+    std::string input_rtsp_url;//    = "rtsp://input_rtsp_url";
+    std::string output_rtsp_url;//   = "rtsp://output_rtsp_url";//"rtsp://127.0.0.1:8555/ch1";
+    if (argc > 1) { input_rtsp_url = std::string(argv[1]); }
+    if (argc > 2) { output_rtsp_url = std::string(argv[2]); }
+    if (input_rtsp_url == "")
+    {
+        input_rtsp_url = input_rtsp_url_default;
+    }
+    if (output_rtsp_url == "")
+    {
+        output_rtsp_url = output_rtsp_url_default;
+    }
+    std::cout << "Repost rtsp url \nfrom [" << input_rtsp_url << "] \nto   [" << output_rtsp_url << "]" << std::endl;
 
     // av_register_all();
     avformat_network_init();
