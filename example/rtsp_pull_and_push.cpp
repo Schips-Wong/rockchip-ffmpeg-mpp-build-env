@@ -9,6 +9,9 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
+#define AVCODEC_DECODER_NAME "h264_rkmpp"
+#define AVCODEC_ENCODER_NAME "h264_rkmpp"
+
 void list_encoders() {
    const AVCodec *codec = nullptr;
    void *i = 0;
@@ -57,10 +60,14 @@ int main(int argc, char * argv[]) {
         std::cerr << "Could not find stream information." << std::endl;
         return -1;
     }
-    const AVCodec *decoder = avcodec_find_decoder_by_name("h264_rkmpp");
+    AVCodec *decoder = (AVCodec *)avcodec_find_decoder_by_name(AVCODEC_DECODER_NAME);
+	if (!decoder) {
+        std::cout << "Decoder not found, try another " << std::endl;
+	    decoder = (AVCodec *)avcodec_find_decoder(AV_CODEC_ID_H264);
+	    //decoder = (AVCodec *)avcodec_find_decoder_by_name("h264_cuvid");
+	}
 
-
-    int video_stream_index = av_find_best_stream(input_format_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0);
+    int video_stream_index = av_find_best_stream(input_format_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
     if (video_stream_index < 0) {
         std::cerr << "Could not find video stream in the input." << std::endl;
         return -1;
@@ -78,13 +85,19 @@ int main(int argc, char * argv[]) {
         std::cerr << "Could not create output context." << std::endl;
         return -1;
     }
-    // list_encoders();
     // AVCodec *encoder = avcodec_find_encoder(AV_CODEC_ID_H264);
-    const AVCodec *encoder = avcodec_find_encoder_by_name("h264_rkmpp");
+    AVCodec *encoder = (AVCodec *)avcodec_find_encoder_by_name(AVCODEC_ENCODER_NAME);
     if (!encoder) {
+        std::cout << "Decoder not found, try another " << std::endl;
+        encoder = (AVCodec *)avcodec_find_encoder(AV_CODEC_ID_H264);
+    }
+    if (!encoder) {
+        list_encoders();
         std::cerr << "H264 encoder not found." << std::endl;
         return -1;
     }
+
+    std::cout << "=========" << std::endl;
     std::cout << "Decoder: " << decoder->name << std::endl;
     std::cout << "Encoder: " << encoder->name << std::endl;
     AVStream *out_stream = avformat_new_stream(output_format_ctx, encoder);
