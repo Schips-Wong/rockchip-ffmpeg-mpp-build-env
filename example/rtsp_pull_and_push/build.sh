@@ -4,7 +4,7 @@
 APP_NAME=rtsp-pull-and-push
 
 ## 自动获取工具链前缀
-HOST_TC=`cat ../build.sh | grep -v "#" | grep "HOST_TC=" | head -n 1 | awk -F= '{print$2}'`
+HOST_TC=`cat ../../build.sh | grep -v "#" | grep "HOST_TC=" | head -n 1 | awk -F= '{print$2}'`
 if [ ! -z "$HOST_TC" ];then
 	HOST_TC_=${HOST_TC}-
 fi
@@ -31,4 +31,5 @@ bash <<EOF
 cd $BUILD_DIR
 cmake .. -DOUTPUT_APPNAME=$APP_NAME -DOUTPUT_DIRNAME=${OUTPUT_DIR}  "$cc_arg"
 make -j16
+${HOST_TC_}strip  $OUTPUT_DIR/$APP_NAME
 EOF
